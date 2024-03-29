@@ -20,6 +20,7 @@
         <br>
         <label for="image">Image</label>
         <input type="file" @change="getImage" :required="false">
+        
         <button type="submit">Créer</button>
     </form>
 
@@ -37,6 +38,7 @@ const form = reactive({
 
 const getImage = (event) => {
     form.image = event.target.files[0];
+    console.log('mon img : ',form.image);
 };
 
 const {errors, storeArticle} = useArticles()

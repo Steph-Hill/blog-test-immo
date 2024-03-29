@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticleRequest;
+use Illuminate\Auth\Events\Validated;
 use App\Http\Resources\ArticleResource;
 use Illuminate\Support\Facades\Storage;
+use RahulHaque\Filepond\Facades\Filepond;
 
 class ArticleController extends Controller
 {
@@ -55,38 +58,33 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ArticleRequest $request, Article $article)
+    public function update(Request $request, Article $article)
     {
-        $data = $this->extractData($article, $request);
-        /* met a jour l'article avec les vaditations effectuées */
-        $article->update($data);
-        /* retourn une nouvelle instance de l'article mis a jour*/
-        return new ArticleResource($article);
-    }
+        $article->update($request->validated());
 
-    private function extractData(Article $article, ArticleRequest $request): array
-    {
-        $data = $request->validated();
-        $image = $request->validated('image');
-        //controle l'existance d'image 
-        if ($image == null || $image->getError()) {
-            return $data;
-        }
-        //supprime l'ancienne image 
-        if ($article->image) {
-            //supprime l'ancienne image
-            Storage::disk('public')->delete($article->image);
-        }
-        //affect un autre nom de fichier a la nouvelle image
-        $file_name = time() . '_' . $image->getClientOriginalName();
-        $data['image'] = $image->storeAs('uploads/images', $file_name, 'public');
+        // Single and multiple file validation
+        $this->validate($request, [
+              'avatar' => Rule::filepond([
+                'required',
+                'image',
+                'max:2000'
+            ]),
+        ]);
+        // Set filename
+        $avatarName = 'avatar-' . 1;
 
-        $data->save();
+        $fileInfo = Filepond::field($request->avatar)
+            ->moveTo('avatars/' . $avatarName);
 
-        return $data;
-    }
+        
 
+        return response()->json([
+            'data' => $fileInfo,
+        ]);
+/*         return new ArticleResource($article);
+ */    }
 
+    
 
     /**
      * Remove the specified resource from storage.

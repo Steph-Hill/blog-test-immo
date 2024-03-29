@@ -3,24 +3,32 @@
     <div v-if="errors">
         <div v-for="(v,k) in errors" :key="k">
             <p v-for="error in v" :key="error">
-              {{ error }}
+                {{ error }}
             </p>
 
         </div>
     </div>
 
-    <form v-on:submit.prevent="saveArticle">
+    <form action="" v-on:submit.prevent="saveArticle" enctype="multipart/form-data" >
         <label for="title">Titre</label>
         <input type="text" name="title" id="title" v-model="article.title">
         <br>
         <br>
         <label for="content">Description</label>
-        <textarea name="content" id="content" cols="30" rows="10" v-model="article.content"></textarea>
+        <textarea name="" id="" cols="30" rows="10" v-model="article.content" ></textarea>
         <br>
         <br>
         <label for="image">Image</label>
-        <input type="file" @change="getImage" :required="false">
-
+        <input type="file" @change="newImage">
+        
+        <file-pond
+            name="test"
+            label-idle="Drop files here..."
+            v-bind:allow-multiple="true"
+            accepted-file-types="image/jpeg, image/png"
+            v-on:processfile="handleProcessfile"
+            v-on:init="handleFilePondInit"
+        />
         <button type="submit">Save</button>
     </form>
 </template>
@@ -29,7 +37,35 @@
 import useArticles from '../../composables/articles';
 import {onMounted} from 'vue';
 
-const { errors, article, updateArticle, getArticle } = useArticles()
+/* filePond */
+import vueFilePond,{setOptions} from "vue-filepond";
+import "filepond/dist/filepond.min.css";
+import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
+import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
+import FilePondPluginImagePreview from "filepond-plugin-image-preview";
+
+// Create component
+const FilePond = vueFilePond(
+  FilePondPluginFileValidateType,
+  FilePondPluginImagePreview
+);
+const handleProcessfile = (error,file) =>{
+    gallery.value.push(file.serverId)
+}
+const handleFilePondInit = () => {
+    console.log('first')
+
+    setOptions({
+        server:{
+            url:'/filepond',
+            headers:{
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            }
+        }
+    })
+}
+
+const { errors, article,gallery, updateArticle, getArticle } = useArticles()
 
 const props = defineProps({
     id: {
@@ -38,19 +74,10 @@ const props = defineProps({
     }
 })
 
-const getImage = (event) => {
-    article.image = event.target.files[0];
-    console.log(article.image = event.target.files[0])
-};
-
-
-
 onMounted(() => getArticle(props.id))
 
-
 const saveArticle = async () => {
-       
+    
     await updateArticle(props.id)
 }
-
 </script>

@@ -10,6 +10,8 @@ export default function useArticles() {
     const errors = ref('')
     const router = useRouter()
 
+    const gallery = ref([])
+
     const getArticles = async () => {
         let response = await axios.get('/api/articles')
         articles.value = response.data.data
@@ -20,10 +22,10 @@ export default function useArticles() {
         article.value = response.data.data
     }
 
-    const storeArticle = async (formData) => {
+    const storeArticle = async (formData, data) => {
         errors.value = ''
         try {
-            await axios.post('/api/articles', formData, {
+            await axios.post('/api/articles', formData, data,{
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -37,20 +39,22 @@ export default function useArticles() {
             }
         }
     }
-    const updateArticle = async (id) => {
+    const updateArticle = async (id,formData,gallery) => {
 
         errors.value = ''
         
         try{
-            await axios.patch(`/api/articles/${id}`, article.value)
+            await axios.put(`/api/articles/${id}`, article.value, formData,{
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            },{
+                gallery:gallery.value,
+            })
             
             await router.push({name: 'article.list'})
         }catch (e) {
-            if (e.response.status === 422) {
-                for(const key in e.response.data.errors){
-                    errors.value = e.response.data.errors;
-                }
-            }
+            
         }
     }
 
@@ -61,6 +65,7 @@ export default function useArticles() {
     return {
         errors,
         article,
+        gallery,
         articles,
         getArticle,
         getArticles,
