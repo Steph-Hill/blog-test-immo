@@ -28,7 +28,7 @@ class ArticleController extends Controller
         /* creer un nouvel Article */
         $article = Article::create($request->validated());
 
-        /* vérifie si l'image existe */
+        /* vérifie si fichier est une image*/
         if ($request->hasfile('image')) {
             $file = $request->file('image');
             $file_name = time() . '_' . $file->getClientOriginalName();
@@ -57,11 +57,9 @@ class ArticleController extends Controller
      */
     public function update(ArticleRequest $request, Article $article)
     {
+        $data = $this->extractData($article, $request);
         /* met a jour l'article avec les vaditations effectuées */
-        $article->update($request->validated());
-
-        $this->extractData($article, $request);
-
+        $article->update($data);
         /* retourn une nouvelle instance de l'article mis a jour*/
         return new ArticleResource($article);
     }
@@ -70,16 +68,20 @@ class ArticleController extends Controller
     {
         $data = $request->validated();
         $image = $request->validated('image');
-
+        //controle l'existance d'image 
         if ($image == null || $image->getError()) {
             return $data;
         }
-        /* supprime l'ancienne image */
+        //supprime l'ancienne image 
         if ($article->image) {
+            //supprime l'ancienne image
             Storage::disk('public')->delete($article->image);
         }
+        //affect un autre nom de fichier a la nouvelle image
         $file_name = time() . '_' . $image->getClientOriginalName();
         $data['image'] = $image->storeAs('uploads/images', $file_name, 'public');
+
+        $data->save();
 
         return $data;
     }
