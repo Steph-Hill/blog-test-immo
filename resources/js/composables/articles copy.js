@@ -39,20 +39,17 @@ export default function useArticles() {
             }
         }
     }
-    const updateArticle = async (id,formData) => {
+    const updateArticle = async (id,gallery) => {
 
         errors.value = ''
         
         try{
-            await axios.patch(`/api/articles/${id}`,article.value,formData,{
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+            await axios.put(`/api/articles/${id}`, article.value,{
+                gallery:gallery.value,
             })
             
             await router.push({name: 'article.list'})
-        }catch (e) {
-            if (e.response.status === 422) {
+        }catch (e) {if (e.response.status === 422) {
             for(const key in e.response.data.errors){
                 errors.value = e.response.data.errors;
             }
