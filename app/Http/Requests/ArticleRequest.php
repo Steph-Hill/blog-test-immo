@@ -25,11 +25,11 @@ class ArticleRequest extends FormRequest
         return [
             'title' => ['required','string'],
             'content' => ['required','string'],
-            'image' => [
+            /* 'image' => [
                 'image', // Le fichier doit être une image
                 'mimes:jpeg,jpg,png', // Formats d'image autorisés
                 'max:2048', // Taille maximale (en Ko)
-            ]
+            ] */
             
         ];
     }

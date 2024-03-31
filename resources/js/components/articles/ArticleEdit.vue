@@ -32,6 +32,7 @@ import { onMounted, ref } from 'vue';
 
 const { errors, article, updateArticle, getArticle } = useArticles()
 
+
 const props = defineProps({
     id: {
         required: true,
@@ -43,20 +44,32 @@ const image = ref(null)
 onMounted(() => {
     getArticle(props.id)
     image.value = article.image;
-})
+}) 
+
 const updateImage = (event) => {
     image.value = event.target.files[0]
+  console.log('update image : ',image.value )
+  console.log('event update:',event)
+
 }
+
 const saveArticle = async () => {
     const formData = new FormData();
+    
     formData.append('title', article.value.title);
+    console.log('formdata title :',article.value.title)
+   
     formData.append('content', article.value.content);
-    if (image.value) {
-        if (article.value.image) {
-            formData.delete('image');
-        }
+    console.log('formdata content :',article.value.content)
+
+    if (image.value !== null) {
+        console.log('image Article :',image.value)
+       
         formData.append('image', image.value);
+        console.log('formdata image',image.value)
     }
     await updateArticle(props.id, formData);
+    console.log('updateArticle :',updateArticle)
 }
+console.log('savearticle',saveArticle)
 </script>

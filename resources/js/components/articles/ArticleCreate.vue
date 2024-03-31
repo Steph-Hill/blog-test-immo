@@ -35,24 +35,35 @@ const form = reactive({
     content:'',
     image: null,
 })
+console.log('form :',form)
 
 const getImage = (event) => {
     form.image = event.target.files[0];
+    console.log('event :',event)
     console.log('mon img : ',form.image);
 };
-
+console.log('getImage',getImage)
 const {errors, storeArticle} = useArticles()
 
 
 const addArticle = async () => {
     const formData = new FormData();
+
     formData.append('title', form.title);
+    console.log('formdata title :',form.title)
+
     formData.append('content', form.content);
+    console.log('formdata title :',form.content)
+
     if(form.image) {
+        console.log('image Article :',form.image)
+
         formData.append('image', form.image);
+        console.log('formdata image',form.image)
     }
 
     await storeArticle(formData);
+    console.log('storeArticle',storeArticle)
 }
 
 </script> 
